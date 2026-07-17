@@ -1,0 +1,23 @@
+{
+  "name": "ethena-backend",
+  "version": "1.0.0",
+  "description": "Node.js REST API backend for the Ethena Smart Saving mobile app.",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node src/server.js",
+    "migrate": "node scripts/migrate.js",
+    "seed": "node scripts/seed.js",
+    "db:init": "node scripts/init-db.js",
+    "db:reset": "node scripts/reset-db.js",
+    "check": "node --check src/server.js && node --check src/app.js && node --check src/db.js && node --check src/database/mysql.js && node --check scripts/migrate.js && node --check scripts/seed.js && node --check scripts/init-db.js && node --check scripts/reset-db.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "mysql2": "^3.11.5"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
