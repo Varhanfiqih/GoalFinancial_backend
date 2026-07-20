@@ -5,6 +5,8 @@ function adminLoginPage() {
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Ethena Admin Login</title>
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
   <style>
     :root {
       --bg: #101321;
@@ -75,15 +77,21 @@ function adminLoginPage() {
       gap: 12px;
     }
     .logo {
-      width: 44px;
-      height: 44px;
+      width: 54px;
+      height: 54px;
       display: grid;
       place-items: center;
+      overflow: hidden;
+      padding: 5px;
       border-radius: 15px;
-      color: white;
-      font-weight: 900;
-      background: linear-gradient(135deg, var(--primary), var(--purple));
+      background: #fff;
       box-shadow: 0 14px 30px rgba(102,121,255,.28);
+    }
+    .logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
     }
     h1, h2, h3, p { margin: 0; }
     .brand h1 {
@@ -264,7 +272,7 @@ function adminLoginPage() {
   <main class="shell">
     <section class="showcase" aria-hidden="true">
       <div class="brand">
-        <div class="logo">E</div>
+        <div class="logo"><img src="/logo.png" alt="Ethena logo" /></div>
         <div>
           <h1>ETHENA ADMIN</h1>
           <p>Financial goals control center</p>
@@ -341,7 +349,7 @@ function adminLoginPage() {
             password: form.get('password')
           })
         });
-        var data = await response.json();
+        var data = await parseJsonResponse(response);
         if (!response.ok) {
           throw new Error(data.message || 'Login gagal. Cek email dan password admin.');
         }
@@ -354,6 +362,16 @@ function adminLoginPage() {
         button.textContent = 'Masuk Dashboard';
       }
     });
+
+    async function parseJsonResponse(response) {
+      var text = await response.text();
+      if (!text.trim()) return {};
+      try {
+        return JSON.parse(text);
+      } catch (error) {
+        throw new Error('Server tidak mengirim JSON valid. Status ' + response.status + ': ' + text.slice(0, 160));
+      }
+    }
   </script>
 </body>
 </html>`;

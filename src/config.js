@@ -15,6 +15,7 @@ module.exports = {
     database: process.env.DB_NAME || 'ethena_db',
     waitForConnections: true,
     connectionLimit: 10,
+    connectTimeout: Number(process.env.DB_CONNECT_TIMEOUT || 5000),
     namedPlaceholders: true,
   },
 };

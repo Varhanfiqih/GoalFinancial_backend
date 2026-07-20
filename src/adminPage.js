@@ -9,6 +9,8 @@ function adminPage(page = 'dashboard') {
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Ethena Admin Dashboard</title>
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
   <style>
     :root {
       --bg: #171a29;
@@ -67,15 +69,21 @@ function adminPage(page = 'dashboard') {
       padding: 0 8px 22px;
     }
     .logo {
-      width: 36px;
-      height: 36px;
+      width: 42px;
+      height: 42px;
       display: grid;
       place-items: center;
+      overflow: hidden;
+      padding: 4px;
       border-radius: 12px;
-      background: linear-gradient(135deg, var(--primary), #8b5cf6);
-      color: white;
-      font-weight: 900;
+      background: #fff;
       box-shadow: 0 13px 28px rgba(102,121,255,.28);
+    }
+    .logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
     }
     .brand strong { display: block; font-size: 14px; letter-spacing: .02em; }
     .brand span, .menu-title, .muted { color: var(--muted); }
@@ -960,7 +968,7 @@ function adminPage(page = 'dashboard') {
   <div class="layout">
     <aside class="sidebar">
       <div class="brand">
-        <div class="logo">E</div>
+        <div class="logo"><img src="/logo.png" alt="Ethena logo" /></div>
         <div>
           <strong>ETHENA</strong>
           <span>Admin Dashboard</span>
@@ -1271,9 +1279,19 @@ function adminPage(page = 'dashboard') {
         window.location.href = '/admin/login';
         return {};
       }
-      var data = await response.json();
+      var data = await parseJsonResponse(response);
       if (!response.ok) throw new Error(data.message || 'Gagal mengambil data ' + url);
       return data;
+    }
+
+    async function parseJsonResponse(response) {
+      var text = await response.text();
+      if (!text.trim()) return {};
+      try {
+        return JSON.parse(text);
+      } catch (error) {
+        throw new Error('Server tidak mengirim JSON valid. Status ' + response.status + ': ' + text.slice(0, 160));
+      }
     }
 
     function renderPageChrome() {

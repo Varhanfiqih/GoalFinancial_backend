@@ -1,4 +1,6 @@
 const http = require('node:http');
+const fs = require('node:fs');
+const path = require('node:path');
 const { readJson, sendJson, sendHtml, redirect, parseRequestUrl, getBearerToken, getCookie } = require('./utils/http');
 const { hashPassword, publicUser, signToken, verifyPassword, verifyToken } = require('./utils/auth');
 const { query, transaction } = require('./db');
@@ -15,6 +17,9 @@ function createApp() {
       const auth = await authenticate(req);
       const adminAuth = await authenticateAdmin(req);
 
+      if (req.method === 'GET' && pathname === '/logo.png') return sendPublicImage(res, 'logo.png', 'image/png');
+      if (req.method === 'GET' && pathname === '/favicon.png') return sendPublicImage(res, 'favicon.png', 'image/png');
+      if (req.method === 'GET' && pathname === '/favicon.ico') return sendPublicImage(res, 'favicon.ico', 'image/x-icon');
       if (req.method === 'GET' && pathname === '/admin/login') return sendHtml(res, 200, adminLoginPage());
       if (req.method === 'POST' && pathname === '/api/admin/login') return adminLogin(res, body);
       if (req.method === 'POST' && pathname === '/api/admin/logout') return adminLogout(res);
@@ -87,6 +92,18 @@ function createApp() {
         : error.message || 'Bad request';
       return sendJson(res, 400, { message });
     }
+  });
+}
+
+function sendPublicImage(res, fileName, contentType) {
+  const imagePath = path.join(__dirname, '..', 'public', fileName);
+  fs.readFile(imagePath, (error, data) => {
+    if (error) return sendJson(res, 404, { message: 'Image not found' });
+    res.writeHead(200, {
+      'Content-Type': contentType,
+      'Cache-Control': 'public, max-age=86400',
+    });
+    res.end(data);
   });
 }
 
