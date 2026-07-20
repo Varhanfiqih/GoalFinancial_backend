@@ -1,22 +1,8 @@
-const { createApp } = require('../src/app');
-
-const app = createApp();
+const { handleRequest } = require('../src/app');
 
 module.exports = function handler(req, res) {
-  return new Promise((resolve) => {
-    res.once('finish', resolve);
-    res.once('close', resolve);
-    res.once('error', (error) => {
-      sendFallbackError(res, error);
-      resolve();
-    });
-
-    try {
-      app.emit('request', req, res);
-    } catch (error) {
-      sendFallbackError(res, error);
-      resolve();
-    }
+  return handleRequest(req, res).catch((error) => {
+    sendFallbackError(res, error);
   });
 };
 

@@ -8,11 +8,18 @@ const { adminPage } = require('./adminPage');
 const { adminLoginPage } = require('./adminLoginPage');
 
 function createApp() {
-  return http.createServer(async (req, res) => {
+  return http.createServer(handleRequest);
+}
+
+async function handleRequest(req, res) {
     if (req.method === 'OPTIONS') return sendJson(res, 204, {});
 
     try {
       const { pathname, query: urlQuery } = parseRequestUrl(req);
+
+      if (req.method === 'GET' && pathname === '/health') return sendJson(res, 200, { ok: true });
+      if (req.method === 'GET' && pathname === '/api/debug') return sendJson(res, 200, debugInfo());
+
       const body = ['POST', 'PUT', 'PATCH'].includes(req.method) ? await readJson(req) : {};
       const auth = await authenticate(req);
       const adminAuth = await authenticateAdmin(req);
@@ -33,8 +40,6 @@ function createApp() {
         if (!adminAuth.admin) return redirect(res, '/admin/login');
         return sendHtml(res, 200, adminPage(pathname.replace('/admin/', '') || 'dashboard'));
       }
-
-      if (req.method === 'GET' && pathname === '/health') return sendJson(res, 200, { ok: true });
 
       if (pathname.startsWith('/api/admin/') && !adminAuth.admin) {
         return sendJson(res, 401, { message: 'Admin unauthorized' });
@@ -92,7 +97,26 @@ function createApp() {
         : error.message || 'Bad request';
       return sendJson(res, 400, { message });
     }
-  });
+}
+
+function debugInfo() {
+  return {
+    ok: true,
+    node: process.version,
+    env: {
+      hasTidbHost: Boolean(process.env.TIDB_HOST),
+      hasTidbUser: Boolean(process.env.TIDB_USER),
+      hasTidbPassword: Boolean(process.env.TIDB_PASSWORD),
+      tidbPort: process.env.TIDB_PORT || null,
+      tidbDatabase: process.env.TIDB_DATABASE || null,
+      tidbSsl: process.env.TIDB_ENABLE_SSL || null,
+      hasJwtSecret: Boolean(process.env.JWT_SECRET),
+      hasDbHost: Boolean(process.env.DB_HOST),
+      hasDbUser: Boolean(process.env.DB_USER),
+      hasDbPassword: Boolean(process.env.DB_PASSWORD),
+      dbName: process.env.DB_NAME || null,
+    },
+  };
 }
 
 function sendPublicImage(res, fileName, contentType) {
@@ -943,4 +967,4 @@ function toIso(value) {
   return value ? new Date(value).toISOString() : null;
 }
 
-module.exports = { createApp };
+module.exports = { createApp, handleRequest };
