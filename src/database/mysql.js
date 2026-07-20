@@ -19,7 +19,7 @@ async function createDatabaseConnection() {
     },
     async execute(sql, params = []) {
       const result = await client.query(toPostgresQuery(sql, params));
-      return [result.command === 'SELECT' ? result.rows : { affectedRows: result.rowCount }];
+      return [result.command === 'SELECT' ? result.rows : { affectedRows: result.rowCount, rowCount: result.rowCount }];
     },
     async end() {
       await client.end();

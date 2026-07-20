@@ -28,7 +28,7 @@ async function handleRequest(req, res) {
       if (req.method === 'GET' && pathname === '/favicon.png') return sendPublicImage(res, 'favicon.png', 'image/png');
       if (req.method === 'GET' && pathname === '/favicon.ico') return sendPublicImage(res, 'favicon.ico', 'image/x-icon');
       if (req.method === 'GET' && pathname === '/admin/login') return sendHtml(res, 200, adminLoginPage());
-      if (req.method === 'POST' && pathname === '/api/admin/login') return adminLogin(res, body);
+      if (req.method === 'POST' && pathname === '/api/admin/login') return await adminLogin(res, body);
       if (req.method === 'POST' && pathname === '/api/admin/logout') return adminLogout(res);
 
       if (req.method === 'GET' && pathname === '/') {
@@ -45,24 +45,24 @@ async function handleRequest(req, res) {
         return sendJson(res, 401, { message: 'Admin unauthorized' });
       }
 
-      if (req.method === 'GET' && pathname === '/api/admin/summary') return adminSummary(res);
+      if (req.method === 'GET' && pathname === '/api/admin/summary') return await adminSummary(res);
       if (req.method === 'GET' && pathname === '/api/admin/me') return adminMe(res, adminAuth.admin);
-      if (req.method === 'PUT' && pathname === '/api/admin/settings') return updateAdminSettings(res, adminAuth.admin, body);
-      if (req.method === 'PUT' && pathname === '/api/admin/password') return updateAdminPassword(res, adminAuth.admin, body);
-      if (req.method === 'GET' && pathname === '/api/admin/users') return adminUsers(res);
-      if (req.method === 'POST' && pathname === '/api/admin/users') return adminCreateUser(res, body);
-      if (req.method === 'PUT' && match(pathname, /^\/api\/admin\/users\/([^/]+)$/)) return adminUpdateUser(res, pathname, body);
-      if (req.method === 'DELETE' && match(pathname, /^\/api\/admin\/users\/([^/]+)$/)) return adminDeleteUser(res, pathname);
-      if (req.method === 'PUT' && match(pathname, /^\/api\/admin\/users\/([^/]+)\/password$/)) return adminResetUserPassword(res, pathname, body);
-      if (req.method === 'GET' && pathname === '/api/admin/goals') return adminGoals(res);
-      if (req.method === 'PUT' && match(pathname, /^\/api\/admin\/goals\/([^/]+)$/)) return adminUpdateGoal(res, pathname, body);
-      if (req.method === 'DELETE' && match(pathname, /^\/api\/admin\/goals\/([^/]+)$/)) return adminDeleteGoal(res, pathname);
-      if (req.method === 'GET' && pathname === '/api/admin/transactions') return adminTransactions(res);
-      if (req.method === 'PUT' && match(pathname, /^\/api\/admin\/transactions\/([^/]+)$/)) return adminUpdateTransaction(res, pathname, body);
-      if (req.method === 'DELETE' && match(pathname, /^\/api\/admin\/transactions\/([^/]+)$/)) return adminDeleteTransaction(res, pathname);
+      if (req.method === 'PUT' && pathname === '/api/admin/settings') return await updateAdminSettings(res, adminAuth.admin, body);
+      if (req.method === 'PUT' && pathname === '/api/admin/password') return await updateAdminPassword(res, adminAuth.admin, body);
+      if (req.method === 'GET' && pathname === '/api/admin/users') return await adminUsers(res);
+      if (req.method === 'POST' && pathname === '/api/admin/users') return await adminCreateUser(res, body);
+      if (req.method === 'PUT' && match(pathname, /^\/api\/admin\/users\/([^/]+)$/)) return await adminUpdateUser(res, pathname, body);
+      if (req.method === 'DELETE' && match(pathname, /^\/api\/admin\/users\/([^/]+)$/)) return await adminDeleteUser(res, pathname);
+      if (req.method === 'PUT' && match(pathname, /^\/api\/admin\/users\/([^/]+)\/password$/)) return await adminResetUserPassword(res, pathname, body);
+      if (req.method === 'GET' && pathname === '/api/admin/goals') return await adminGoals(res);
+      if (req.method === 'PUT' && match(pathname, /^\/api\/admin\/goals\/([^/]+)$/)) return await adminUpdateGoal(res, pathname, body);
+      if (req.method === 'DELETE' && match(pathname, /^\/api\/admin\/goals\/([^/]+)$/)) return await adminDeleteGoal(res, pathname);
+      if (req.method === 'GET' && pathname === '/api/admin/transactions') return await adminTransactions(res);
+      if (req.method === 'PUT' && match(pathname, /^\/api\/admin\/transactions\/([^/]+)$/)) return await adminUpdateTransaction(res, pathname, body);
+      if (req.method === 'DELETE' && match(pathname, /^\/api\/admin\/transactions\/([^/]+)$/)) return await adminDeleteTransaction(res, pathname);
 
-      if (req.method === 'POST' && pathname === '/api/auth/register') return register(res, body);
-      if (req.method === 'POST' && pathname === '/api/auth/login') return login(res, body);
+      if (req.method === 'POST' && pathname === '/api/auth/register') return await register(res, body);
+      if (req.method === 'POST' && pathname === '/api/auth/login') return await login(res, body);
 
       if (pathname.startsWith('/api/') && !auth.user) {
         return sendJson(res, 401, { message: 'Unauthorized' });
@@ -71,24 +71,24 @@ async function handleRequest(req, res) {
       if (req.method === 'GET' && pathname === '/api/auth/me') return sendJson(res, 200, { user: publicUser(auth.user) });
       if (req.method === 'POST' && pathname === '/api/auth/logout') return sendJson(res, 200, { message: 'Logged out' });
 
-      if (req.method === 'GET' && pathname === '/api/dashboard') return dashboard(res, auth.user.id);
+      if (req.method === 'GET' && pathname === '/api/dashboard') return await dashboard(res, auth.user.id);
 
-      if (req.method === 'GET' && pathname === '/api/goals') return listGoals(res, auth.user.id, urlQuery);
-      if (req.method === 'POST' && pathname === '/api/goals') return createGoal(res, auth.user.id, body);
-      if (req.method === 'PUT' && match(pathname, /^\/api\/goals\/([^/]+)$/)) return updateGoal(res, auth.user.id, pathname, body);
-      if (req.method === 'DELETE' && match(pathname, /^\/api\/goals\/([^/]+)$/)) return deleteGoal(res, auth.user.id, pathname);
+      if (req.method === 'GET' && pathname === '/api/goals') return await listGoals(res, auth.user.id, urlQuery);
+      if (req.method === 'POST' && pathname === '/api/goals') return await createGoal(res, auth.user.id, body);
+      if (req.method === 'PUT' && match(pathname, /^\/api\/goals\/([^/]+)$/)) return await updateGoal(res, auth.user.id, pathname, body);
+      if (req.method === 'DELETE' && match(pathname, /^\/api\/goals\/([^/]+)$/)) return await deleteGoal(res, auth.user.id, pathname);
 
-      if (req.method === 'POST' && pathname === '/api/savings') return addSavings(res, auth.user.id, body);
+      if (req.method === 'POST' && pathname === '/api/savings') return await addSavings(res, auth.user.id, body);
 
-      if (req.method === 'GET' && pathname === '/api/transactions') return listTransactions(res, auth.user.id, urlQuery);
+      if (req.method === 'GET' && pathname === '/api/transactions') return await listTransactions(res, auth.user.id, urlQuery);
 
       if (req.method === 'GET' && pathname === '/api/profile') return sendJson(res, 200, { user: publicUser(auth.user) });
-      if (req.method === 'PUT' && pathname === '/api/profile') return updateProfile(res, auth.user.id, body);
-      if (req.method === 'PATCH' && pathname === '/api/profile/preferences') return updatePreferences(res, auth.user.id, body);
-      if (req.method === 'PUT' && pathname === '/api/profile/password') return changePassword(res, auth.user.id, body);
+      if (req.method === 'PUT' && pathname === '/api/profile') return await updateProfile(res, auth.user.id, body);
+      if (req.method === 'PATCH' && pathname === '/api/profile/preferences') return await updatePreferences(res, auth.user.id, body);
+      if (req.method === 'PUT' && pathname === '/api/profile/password') return await changePassword(res, auth.user.id, body);
 
-      if (req.method === 'GET' && pathname === '/api/reports') return reports(res, auth.user.id, urlQuery);
-      if (req.method === 'GET' && pathname === '/api/reports/export') return exportReport(res, auth.user.id, urlQuery);
+      if (req.method === 'GET' && pathname === '/api/reports') return await reports(res, auth.user.id, urlQuery);
+      if (req.method === 'GET' && pathname === '/api/reports/export') return await exportReport(res, auth.user.id, urlQuery);
 
       return sendJson(res, 404, { message: 'Route not found' });
     } catch (error) {
