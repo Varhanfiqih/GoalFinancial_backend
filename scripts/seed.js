@@ -6,9 +6,9 @@ async function main() {
   const connection = await createDatabaseConnection();
   await connection.query(`
     CREATE TABLE IF NOT EXISTS seeders (
-      id INT AUTO_INCREMENT PRIMARY KEY,
+      id SERIAL PRIMARY KEY,
       name VARCHAR(255) NOT NULL UNIQUE,
-      executed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+      executed_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
     )
   `);
 

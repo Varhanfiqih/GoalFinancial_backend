@@ -1,41 +1,56 @@
-const mysql = require('mysql2/promise');
-const path = require('node:path');
-
-try {
-  require('dotenv').config({ path: path.join(__dirname, '..', '..', '.env') });
-} catch {
-  // dotenv is installed with npm install.
-}
-
-function baseConnectionConfig() {
-  return {
-    host: process.env.TIDB_HOST || process.env.DB_HOST || 'localhost',
-    port: Number(process.env.TIDB_PORT || process.env.DB_PORT || 3306),
-    user: process.env.TIDB_USER || process.env.DB_USER || 'root',
-    password: process.env.TIDB_PASSWORD || process.env.DB_PASSWORD || '',
-    multipleStatements: true,
-    ssl: shouldUseSsl() ? { minVersion: 'TLSv1.2' } : undefined,
-  };
-}
+const { Client } = require('pg');
+const { postgres } = require('../config');
 
 function databaseName() {
-  return process.env.TIDB_DATABASE || process.env.DB_NAME || 'ethena_db';
-}
-
-function shouldUseSsl() {
-  if (process.env.DB_SSL === 'false' || process.env.TIDB_ENABLE_SSL === 'false') return false;
-  return process.env.DB_SSL === 'true' || process.env.TIDB_ENABLE_SSL === 'true' || Boolean(process.env.TIDB_HOST);
+  return process.env.POSTGRES_DATABASE || process.env.PGDATABASE || 'neon';
 }
 
 async function createServerConnection() {
-  return mysql.createConnection(baseConnectionConfig());
+  return createDatabaseConnection();
 }
 
 async function createDatabaseConnection() {
-  return mysql.createConnection({
-    ...baseConnectionConfig(),
-    database: databaseName(),
+  const client = new Client(postgres);
+  await client.connect();
+  return {
+    async query(sql, params = []) {
+      const result = await client.query(toPostgresQuery(sql, params));
+      return result.rows;
+    },
+    async execute(sql, params = []) {
+      const result = await client.query(toPostgresQuery(sql, params));
+      return [result.command === 'SELECT' ? result.rows : { affectedRows: result.rowCount }];
+    },
+    async end() {
+      await client.end();
+    },
+  };
+}
+
+function toPostgresQuery(sql, params) {
+  let text = sql
+    .replace(/CREATE DATABASE IF NOT EXISTS .+?;/gis, '')
+    .replace(/`/g, '"')
+    .replace(/\bINT AUTO_INCREMENT\b/gi, 'SERIAL')
+    .replace(/\bDATETIME\b/gi, 'TIMESTAMP')
+    .replace(/\bTINYINT\(1\)\b/gi, 'SMALLINT')
+    .replace(/ ON UPDATE CURRENT_TIMESTAMP/gi, '');
+
+  const values = [];
+  if (Array.isArray(params)) {
+    text = text.replace(/\?/g, () => `$${values.push(params[values.length])}`);
+    return { text, values };
+  }
+
+  const seen = new Map();
+  text = text.replace(/:([A-Za-z_][A-Za-z0-9_]*)/g, (match, name) => {
+    if (!seen.has(name)) {
+      seen.set(name, values.push(params[name]));
+    }
+    return `$${seen.get(name)}`;
   });
+
+  return values.length > 0 ? { text, values } : { text };
 }
 
 module.exports = {

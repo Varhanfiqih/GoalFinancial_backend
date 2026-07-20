@@ -1,19 +1,15 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { createServerConnection, createDatabaseConnection, databaseName } = require('../src/database/mysql');
+const { createDatabaseConnection, databaseName } = require('../src/database/mysql');
 
 async function main() {
   const dbName = databaseName();
-  const serverConnection = await createServerConnection();
-  await serverConnection.query(`CREATE DATABASE IF NOT EXISTS \`${dbName}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`);
-  await serverConnection.end();
-
   const connection = await createDatabaseConnection();
   await connection.query(`
     CREATE TABLE IF NOT EXISTS migrations (
-      id INT AUTO_INCREMENT PRIMARY KEY,
+      id SERIAL PRIMARY KEY,
       name VARCHAR(255) NOT NULL UNIQUE,
-      executed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+      executed_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
     )
   `);
 

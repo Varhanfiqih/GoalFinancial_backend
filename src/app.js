@@ -104,17 +104,11 @@ function debugInfo() {
     ok: true,
     node: process.version,
     env: {
-      hasTidbHost: Boolean(process.env.TIDB_HOST),
-      hasTidbUser: Boolean(process.env.TIDB_USER),
-      hasTidbPassword: Boolean(process.env.TIDB_PASSWORD),
-      tidbPort: process.env.TIDB_PORT || null,
-      tidbDatabase: process.env.TIDB_DATABASE || null,
-      tidbSsl: process.env.TIDB_ENABLE_SSL || null,
+      hasDatabaseUrl: Boolean(process.env.DATABASE_URL),
+      hasPostgresUrl: Boolean(process.env.POSTGRES_URL),
+      hasPostgresPrismaUrl: Boolean(process.env.POSTGRES_PRISMA_URL),
+      hasPostgresUrlNonPooling: Boolean(process.env.POSTGRES_URL_NON_POOLING),
       hasJwtSecret: Boolean(process.env.JWT_SECRET),
-      hasDbHost: Boolean(process.env.DB_HOST),
-      hasDbUser: Boolean(process.env.DB_USER),
-      hasDbPassword: Boolean(process.env.DB_PASSWORD),
-      dbName: process.env.DB_NAME || null,
     },
   };
 }
@@ -894,7 +888,7 @@ function mapGoal(row) {
     category: row.category,
     savedAmount: Number(row.saved_amount),
     targetAmount: Number(row.target_amount),
-    targetDate: row.target_date ? row.target_date.toISOString().slice(0, 10) : null,
+    targetDate: row.target_date ? toDateOnly(row.target_date) : null,
     coverUrl: row.cover_url,
     status: row.status,
     completedAt: toIso(row.completed_at),
@@ -965,6 +959,12 @@ function toBoolNumber(value) {
 
 function toIso(value) {
   return value ? new Date(value).toISOString() : null;
+}
+
+function toDateOnly(value) {
+  if (!value) return null;
+  if (value instanceof Date) return value.toISOString().slice(0, 10);
+  return String(value).slice(0, 10);
 }
 
 module.exports = { createApp, handleRequest };
