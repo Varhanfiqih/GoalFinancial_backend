@@ -9,17 +9,17 @@ try {
 
 function baseConnectionConfig() {
   return {
-    host: process.env.DB_HOST || process.env.TIDB_HOST || 'localhost',
-    port: Number(process.env.DB_PORT || process.env.TIDB_PORT || 3306),
-    user: process.env.DB_USER || process.env.TIDB_USER || 'root',
-    password: process.env.DB_PASSWORD || process.env.TIDB_PASSWORD || '',
+    host: process.env.TIDB_HOST || process.env.DB_HOST || 'localhost',
+    port: Number(process.env.TIDB_PORT || process.env.DB_PORT || 3306),
+    user: process.env.TIDB_USER || process.env.DB_USER || 'root',
+    password: process.env.TIDB_PASSWORD || process.env.DB_PASSWORD || '',
     multipleStatements: true,
     ssl: shouldUseSsl() ? { minVersion: 'TLSv1.2' } : undefined,
   };
 }
 
 function databaseName() {
-  return process.env.DB_NAME || process.env.TIDB_DATABASE || 'ethena_db';
+  return process.env.TIDB_DATABASE || process.env.DB_NAME || 'ethena_db';
 }
 
 function shouldUseSsl() {
